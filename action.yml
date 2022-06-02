@@ -31,11 +31,11 @@ runs:
         aws-region: ${{ inputs.aws-region }}
 
     - if: ${{ inputs.use-ecr }}
-      - name: Login to ECR
+        name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v1
 
     - if: ${{ inputs.ca-domain != '' }}
-      - name: "Setup CodeArtifact"
+        name: "Setup CodeArtifact"
         uses: soluciones-algoritmicas/setup-codeartifact@v1
         with:
           domain: {{ inputs.ca-domain }}
