@@ -1,0 +1,44 @@
+name: 'Setup AWS'
+description: 'Setup combined actions for using AWS'
+
+inputs:
+  aws-access-key-id:
+    required: true
+  aws-secret-access-key:
+    required: true
+  aws-region:
+    default: us-east-1
+    required: true
+  use-ecr:
+    description: 'If true, login to Amazon ECR'
+    default: true
+  ca-domain:
+    description: 'CodeArtifact domain. Leave blank to avoid setting up CodeArtifact'
+    default: ''
+  ca-domain-owner:
+    description: 'CodeArtifact domain-owner'
+  ca-repository:
+    description: 'CodeArtifact repository'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - if: ${{ inputs.use-ecr }}
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+    - if: ${{ inputs.ca-domain != '' }}
+      - name: "Setup CodeArtifact"
+        uses: soluciones-algoritmicas/setup-codeartifact@v1
+        with:
+          domain: {{ inputs.ca-domain }}
+          domain-owner: {{ inputs.ca-domain-owner }}
+          region: {{ inputs.aws-region }}
+          repository: {{ inputs.ca-repository }}
