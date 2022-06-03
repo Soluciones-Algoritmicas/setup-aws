@@ -20,6 +20,11 @@ inputs:
   ca-repository:
     description: 'CodeArtifact repository'
 
+outputs:
+  ecr-registry:
+    description: 'The URI of the ECR registry i.e. aws_account_id.dkr.ecr.region.amazonaws.com'
+    value: ${{ steps.login-ecr.outputs.registry }}
+
 runs:
   using: 'composite'
   steps:
@@ -31,14 +36,15 @@ runs:
         aws-region: ${{ inputs.aws-region }}
 
     - if: ${{ inputs.use-ecr }}
-        name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v1
+      name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
     - if: ${{ inputs.ca-domain != '' }}
-        name: "Setup CodeArtifact"
-        uses: soluciones-algoritmicas/setup-codeartifact@v1
-        with:
-          domain: {{ inputs.ca-domain }}
-          domain-owner: {{ inputs.ca-domain-owner }}
-          region: {{ inputs.aws-region }}
-          repository: {{ inputs.ca-repository }}
+      name: "Setup CodeArtifact"
+      uses: soluciones-algoritmicas/setup-codeartifact@v1
+      with:
+        domain: ${{ inputs.ca-domain }}
+        domain-owner: ${{ inputs.ca-domain-owner }}
+        region: ${{ inputs.aws-region }}
+        repository: ${{ inputs.ca-repository }}
