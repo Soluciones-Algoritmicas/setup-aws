@@ -9,9 +9,9 @@ inputs:
   aws-region:
     default: us-east-1
     required: true
-  use-ecr:
-    description: 'If true, login to Amazon ECR'
-    default: true
+  ecr-repository:
+    description: 'Repository name to use (or create if it doesnt exist)'
+    default: ''
   ca-domain:
     description: 'CodeArtifact domain. Leave blank to avoid setting up CodeArtifact'
     default: ''
@@ -35,10 +35,14 @@ runs:
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
 
-    - if: ${{ inputs.use-ecr }}
+    - if: ${{ inputs.ecr-repository }}
       name: Login to ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+
+    - if: ${{ inputs.ecr-repository }}
+      shell: bash
+      run: aws ecr describe-repositories --repository-names '${{ inputs.ecr-repository }}' || aws ecr create-repository --repository-name '${{ inputs.ecr-repository }}'
 
     - if: ${{ inputs.ca-domain != '' }}
       name: "Setup CodeArtifact"
