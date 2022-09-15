@@ -34,6 +34,7 @@ runs:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
+        mask-aws-account-id: false
 
     - if: ${{ inputs.ecr-repository }}
       name: Login to ECR
@@ -42,7 +43,10 @@ runs:
 
     - if: ${{ inputs.ecr-repository }}
       shell: bash
-      run: aws ecr describe-repositories --repository-names '${{ inputs.ecr-repository }}' || aws ecr create-repository --repository-name '${{ inputs.ecr-repository }}'
+      run: |
+        for repo in ${{ inputs.ecr-repository }}; do
+          aws ecr describe-repositories --repository-names "$repo" || aws ecr create-repository --repository-name "$repo";
+        done
 
     - if: ${{ inputs.ca-domain != '' }}
       name: "Setup CodeArtifact"
